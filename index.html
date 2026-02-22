@@ -9,187 +9,379 @@
         :root {
             --bg: #0a0a0a;
             --card: #141414;
-            --red-glow: rgba(255, 46, 46, 0.5);
-            --green-glow: rgba(46, 255, 113, 0.4);
+            --red-glow: rgba(255, 46, 46, 0.6);
+            --green-glow: rgba(46, 255, 113, 0.5);
             --red: #ff2e2e;
             --green: #2ecc71;
+            --accent: #ff4d4d;
         }
 
+        * { box-sizing: border-box; }
+
         body {
-            background-color: var(--bg);
+            background: var(--bg);
             color: white;
             font-family: 'Montserrat', sans-serif;
             margin: 0;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            padding: 40px 15px;
+            padding: 50px 15px;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        .container { width: 100%; max-width: 420px; }
-
-        h1 { text-align: center; font-weight: 900; font-size: 26px; margin-bottom: 5px; }
-        .sub { text-align: center; color: #888; font-size: 13px; margin-bottom: 40px; }
-
-        /* Progress Bar */
-        .prog-info { display: flex; justify-content: space-between; font-size: 11px; font-weight: 900; color: #666; margin-bottom: 10px; }
-        .bar-outer { background: #1a1a1a; height: 10px; border-radius: 20px; overflow: hidden; margin-bottom: 30px; border: 1px solid #222; }
-        .bar-inner { 
-            height: 100%; width: 0%; background: linear-gradient(90deg, #ff2e2e, #ff6b6b); 
-            box-shadow: 0 0 15px var(--red-glow); transition: width 0.8s ease;
+        /* Fondo partículas sutiles */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(255,46,46,0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(46,255,113,0.06) 0%, transparent 50%);
+            pointer-events: none;
+            animation: bgPulse 12s infinite alternate ease-in-out;
         }
 
-        /* Tasks */
+        @keyframes bgPulse {
+            0% { opacity: 0.6; transform: scale(1); }
+            100% { opacity: 0.9; transform: scale(1.05); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 440px;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 900;
+            font-size: 32px;
+            margin: 0 0 8px;
+            background: linear-gradient(90deg, #ff4d4d, #ff8c8c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 10px rgba(255,77,77,0.5); }
+            100% { text-shadow: 0 0 25px rgba(255,77,77,0.9); }
+        }
+
+        .sub {
+            text-align: center;
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 45px;
+        }
+
+        /* Progress Bar mejorada */
+        .prog-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 900;
+            color: #777;
+            margin-bottom: 12px;
+        }
+
+        .bar-outer {
+            background: #1a1a1a;
+            height: 14px;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 40px;
+            border: 1px solid #222;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+            position: relative;
+        }
+
+        .bar-inner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff2e2e, #ff6b6b, #ff2e2e);
+            background-size: 200% 100%;
+            animation: gradientFlow 4s linear infinite;
+            box-shadow: 0 0 20px var(--red-glow), inset 0 2px 4px rgba(255,255,255,0.15);
+            transition: width 1s cubic-bezier(0.22, 0.61, 0.36, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-inner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+            animation: shine 2.5s infinite;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            60% { transform: translateX(100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Tasks con animación de entrada */
         .task {
             background: var(--card);
-            border-radius: 20px;
-            padding: 22px;
-            margin-bottom: 20px;
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
             border: 1px solid #1f1f1f;
-            transition: all 0.4s ease;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0;
+            transform: translateY(40px);
         }
-        .task.active { border-color: var(--red); box-shadow: 0 0 20px var(--red-glow); }
-        .task.completed { border-color: var(--green); box-shadow: 0 0 20px var(--green-glow); }
-        .task.locked { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
+
+        .task.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .task.active {
+            border-color: var(--red);
+            box-shadow: 0 0 30px var(--red-glow);
+            transform: scale(1.02);
+        }
+
+        .task.completed {
+            border-color: var(--green);
+            box-shadow: 0 0 30px var(--green-glow);
+        }
+
+        .task.locked {
+            opacity: 0.25;
+            filter: grayscale(0.7) blur(1px);
+            pointer-events: none;
+            transform: scale(0.96);
+        }
 
         .badge {
             background: var(--red);
-            width: 32px; height: 32px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; margin-bottom: 15px;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
-        .completed .badge { background: var(--green); }
 
-        .task-title { font-size: 17px; font-weight: 700; margin-bottom: 5px; }
-        .task-sub { color: #888; font-size: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; }
+        .completed .badge {
+            background: var(--green);
+        }
 
-        /* Timer UI Style from Image */
+        .task-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+        .task-sub { color: #999; font-size: 13px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
         .timer-ui {
-            background: rgba(255, 140, 0, 0.1);
-            border: 1px solid rgba(255, 140, 0, 0.2);
-            color: #ff9d4d;
-            padding: 10px; border-radius: 12px; font-size: 12px;
-            font-weight: 700; margin-bottom: 15px; display: none;
+            background: rgba(255, 140, 0, 0.15);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            color: #ffb366;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 16px;
             text-align: center;
+            display: none;
+            animation: pulseTimer 2s infinite;
         }
 
-        /* Buttons */
-        .btn {
-            background: #cc2525; color: white; border: none; width: 100%;
-            padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            font-family: 'Montserrat'; transition: 0.3s;
+        @keyframes pulseTimer {
+            0%,100% { opacity: 0.8; }
+            50% { opacity: 1; }
         }
-        .btn-proc { background: #2a2d31 !important; color: #a0a0a0; pointer-events: none; }
-        .btn-done { background: var(--green) !important; }
+
+        /* Botones con más vida */
+        .btn {
+            background: linear-gradient(135deg, #d32f2f, #f44336);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 6px 20px rgba(211,47,47,0.4);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 12px 30px rgba(211,47,47,0.6);
+        }
+
+        .btn-proc {
+            background: #2a2d31 !important;
+            color: #888;
+            pointer-events: none;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn-done {
+            background: linear-gradient(135deg, var(--green), #4caf50) !important;
+            box-shadow: 0 6px 20px rgba(46,204,113,0.5) !important;
+        }
 
         #final-download {
             display: none;
-            background: linear-gradient(135deg, #ff2e2e, #ff6b6b);
-            color: white; border: none; 
-            width: 80%; margin: 20px auto;
-            padding: 16px; border-radius: 50px;
-            font-weight: 900; font-size: 15px;
-            cursor: pointer; box-shadow: 0 0 25px var(--red-glow);
-            animation: bounceIn 0.6s ease, pulse 2s infinite;
+            background: linear-gradient(135deg, #ff1744, #ff5252, #ff1744);
+            background-size: 200%;
+            color: white;
+            border: none;
+            width: 85%;
+            margin: 35px auto 20px;
+            padding: 18px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 17px;
+            cursor: pointer;
+            box-shadow: 0 0 40px rgba(255,23,68,0.7);
+            animation: finalPulse 2s infinite, gradientFlow 5s linear infinite;
         }
 
-        @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes finalPulse {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
 
         /* Loader */
         #loader-screen {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 9999; flex-direction: column;
-            align-items: center; justify-content: center; gap: 20px;
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10,10,10,0.97);
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
         }
-        .spinner { width: 50px; height: 50px; border: 5px solid #222; border-top-color: var(--red); border-radius: 50%; animation: spin 1s linear infinite; }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #222;
+            border-top: 6px solid var(--red);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .footer-stats { margin-top: 40px; text-align: center; }
-        .stats-text { font-weight: 700; font-size: 14px; }
-        .stats-text span { color: var(--red); }
+        .footer-stats {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            color: #888;
+        }
+
+        .stats-text span { color: var(--red); font-weight: 900; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Content Unlock</h1>
-    <p class="sub">Complete each task in order to access your exclusive content</p>
+    <p class="sub">Completa las misiones para desbloquear tu contenido exclusivo</p>
 
     <div class="prog-info">
-        <span>YOUR PROGRESS</span>
+        <span>PROGRESO</span>
         <span id="perc" style="color:var(--red)">0%</span>
     </div>
-    <div class="bar-outer"><div class="bar-inner" id="fill"></div></div>
+    <div class="bar-outer">
+        <div class="bar-inner" id="fill"></div>
+    </div>
 
-    <div class="task active" id="t1">
+    <div class="task" id="t1">
         <div class="badge">1</div>
-        <div class="task-title">Complete the survey</div>
-        <div class="task-sub">🕒 7 seconds required</div>
-        <div class="timer-ui" id="box1">🕒 <span id="time1">7</span> seconds remaining</div>
-        <button class="btn" id="btn1" onclick="startTask(1, 7, 'https://URL_ENCUESTA_AQUI.com')">▶ Start Task</button>
+        <div class="task-title">Completar encuesta</div>
+        <div class="task-sub">🕒 7 segundos requeridos</div>
+        <div class="timer-ui" id="box1">🕒 <span id="time1">7</span> segundos restantes</div>
+        <button class="btn" id="btn1" onclick="startTask(1, 7, 'https://URL_ENCUESTA_AQUI.com')">▶ Iniciar</button>
     </div>
 
     <div class="task locked" id="t2">
         <div class="badge">2</div>
-        <div class="task-title">Watch an ad</div>
-        <div class="task-sub">🕒 10 seconds required</div>
-        <div class="timer-ui" id="box2">🕒 <span id="time2">10</span> seconds remaining</div>
-        <button class="btn" id="btn2" onclick="startTask(2, 10, 'https://URL_ANUNCIO_AQUI.com')">▶ Start Task</button>
+        <div class="task-title">Ver anuncio</div>
+        <div class="task-sub">🕒 10 segundos requeridos</div>
+        <div class="timer-ui" id="box2">🕒 <span id="time2">10</span> segundos restantes</div>
+        <button class="btn" id="btn2" onclick="startTask(2, 10, 'https://URL_ANUNCIO_AQUI.com')">▶ Iniciar</button>
     </div>
 
     <div class="task locked" id="t3">
         <div class="badge">3</div>
-        <div class="task-title">Follow Instagram</div>
-        <div class="task-sub">🕒 5 seconds required</div>
-        <div class="timer-ui" id="box3">🕒 <span id="time3">5</span> seconds remaining</div>
-        <button class="btn" id="btn3" onclick="startTask(3, 5, 'https://instagram.com/TU_PERFIL')">▶ Start Task</button>
+        <div class="task-title">Seguir en Instagram</div>
+        <div class="task-sub">🕒 5 segundos requeridos</div>
+        <div class="timer-ui" id="box3">🕒 <span id="time3">5</span> segundos restantes</div>
+        <button class="btn" id="btn3" onclick="startTask(3, 5, 'https://instagram.com/TU_PERFIL')">▶ Iniciar</button>
     </div>
 
     <div class="task locked" id="t4">
         <div class="badge">4</div>
-        <div class="task-title">Sign Up Bonus</div>
-        <div class="task-sub">🕒 8 seconds required</div>
-        <div class="timer-ui" id="box4">🕒 <span id="time4">8</span> seconds remaining</div>
-        <button class="btn" id="btn4" onclick="startTask(4, 8, 'https://URL_REGISTRO_AQUI.com')">▶ Start Task</button>
+        <div class="task-title">Registro bonus</div>
+        <div class="task-sub">🕒 8 segundos requeridos</div>
+        <div class="timer-ui" id="box4">🕒 <span id="time4">8</span> segundos restantes</div>
+        <button class="btn" id="btn4" onclick="startTask(4, 8, 'https://URL_REGISTRO_AQUI.com')">▶ Iniciar</button>
     </div>
 
     <button id="final-download" onclick="triggerFinalLoader()">DESCARGAR AHORA ⬇</button>
 
     <div class="footer-stats">
-        <div class="stats-text">Tasks Completed: <span id="count">0</span> / 4</div>
+        <div class="stats-text">Tareas completadas: <span id="count">0</span> / 4</div>
     </div>
 </div>
 
 <div id="loader-screen">
     <div class="spinner"></div>
-    <div style="font-weight:900; color:var(--red); font-size:18px;">VERIFICANDO...</div>
+    <div style="font-weight:900; color:var(--red); font-size:22px; letter-spacing: 1px;">VERIFICANDO...</div>
 </div>
 
 <script>
     let completed = 0;
     const total = 4;
 
+    // Mostrar tasks con animación secuencial
+    document.querySelectorAll('.task').forEach((task, i) => {
+        setTimeout(() => task.classList.add('show'), 300 + i * 180);
+    });
+
     function startTask(id, sec, url) {
         const btn = document.getElementById(`btn${id}`);
         const box = document.getElementById(`box${id}`);
         const clock = document.getElementById(`time${id}`);
 
-        // Abrir el link en una pestaña nueva
         window.open(url, '_blank');
 
-        // Cambiar estado a "Procesando"
         btn.disabled = true;
-        btn.innerHTML = '<div class="spinner" style="width:14px; height:14px; border-width:2px; display:inline-block; vertical-align:middle; margin-right:8px;"></div> Processing...';
+        btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:3px;display:inline-block;vertical-align:middle;margin-right:10px;"></div> Procesando...';
         btn.classList.add('btn-proc');
-        if(box) box.style.display = 'block';
+        if (box) box.style.display = 'block';
 
         let left = sec;
         let itv = setInterval(() => {
             left--;
-            if(clock) clock.innerText = left;
-            if(left <= 0) {
+            if (clock) clock.innerText = left;
+            if (left <= 0) {
                 clearInterval(itv);
                 finishTask(id);
             }
@@ -203,9 +395,9 @@
 
         card.classList.remove('active');
         card.classList.add('completed');
-        if(box) box.style.display = 'none';
+        if (box) box.style.display = 'none';
         
-        btn.innerHTML = '✓ Done';
+        btn.innerHTML = '✓ Completado';
         btn.classList.remove('btn-proc');
         btn.classList.add('btn-done');
 
@@ -217,12 +409,12 @@
         document.getElementById('perc').innerText = Math.round(progress) + '%';
 
         let next = document.getElementById(`t${id + 1}`);
-        if(next) {
+        if (next) {
             next.classList.remove('locked');
             next.classList.add('active');
         }
 
-        if(completed === total) {
+        if (completed === total) {
             document.getElementById('final-download').style.display = 'block';
         }
     }
@@ -231,10 +423,9 @@
         document.getElementById('loader-screen').style.display = 'flex';
         setTimeout(() => {
             window.location.href = "https://LINK_FINAL_DE_DESCARGA.com";
-        }, 3500);
+        }, 3800);
     }
 </script>
 
 </body>
-  </html>
-  
+</html>
